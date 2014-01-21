@@ -75,6 +75,10 @@
       <Name>ObjectWrapper</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE.md" />
+    <None Include="README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y $(TargtedDir)$(TargetFileName)    $(ProjectDir)..\Behaviors
