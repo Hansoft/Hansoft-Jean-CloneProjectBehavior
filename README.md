@@ -7,9 +7,10 @@ Jean for Hansoft is a Windows Service that you can use to automate  updates of d
 allows you to add custom behaviors that are triggered when changes are made in a Hansoft project where a behavior typically performs a certain
 kind of update of some Hansoft items. 
 
-CloneProjectBehavior is a component that realizes one specific behavior for Jean for Hansoft.
-
-Please see the main Readme for Jean for Hansoft for further information.
+CloneProjectBehavior is a component that realizes one specific behavior for Jean for Hansoft. CloneProjectBehavior is intended to be used together
+with the [HansoftCloneProjectPlugin] [1]. For more information see the documentation of the plugin.
+s
+[1]: https://github.com/Hansoft/HansoftCloneProjectClientPlugin "HansoftCloneProjectPlugin"
 
 
 Terms and conditions

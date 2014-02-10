@@ -115,6 +115,8 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
 
                     session.TaskSetForceSubProject(newTaskID, session.TaskGetForceSubProject(originalTaskID));
 
+                    session.TaskSetDelegateTo(newTaskID, session.TaskGetDelegateTo(originalTaskID));
+
                     session.TaskSetFullyCreated(newTaskID);
 
                     // Cloning custom column data
@@ -262,6 +264,8 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
         {
             HPMSdkSession session = SessionManager.Session;
             session.ProjectCustomColumnsSet(targetProjectViewID, session.ProjectCustomColumnsGet(sourceProjectViewID));
+            HPMProjectDefaultColumns activatedColumns = session.ProjectGetDefaultActivatedColumns(sourceProjectViewID);
+            session.ProjectSetDefaultActivatedColumns(targetProjectViewID, activatedColumns);
         }
 
         void CloneReports(HPMUniqueID sourceProjectID, HPMUniqueID sourceProjectViewID, HPMUniqueID targetProjectViewID)
@@ -316,7 +320,6 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
         void CloneBugWorkflow(HPMUniqueID sourceQAProjectID, HPMUniqueID targetQAProjectID)
         {
         }
-
 
         public override void OnProjectCreate(ProjectCreateEventArgs e)
         {
