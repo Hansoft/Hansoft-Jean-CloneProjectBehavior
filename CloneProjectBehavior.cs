@@ -15,6 +15,7 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
     {
 
         string title;
+        int reportCounter = 0;
 
         public CloneProjectBehavior(XmlElement configuration)
             : base(configuration) 
@@ -268,32 +269,24 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
             session.ProjectSetDefaultActivatedColumns(targetProjectViewID, activatedColumns);
         }
 
-        void CloneReports(HPMUniqueID sourceProjectID, HPMUniqueID sourceProjectViewID, HPMUniqueID targetProjectViewID)
+        void CloneReports(HPMUniqueID sourceProjectID, HPMUniqueID sourceProjectViewID, HPMUniqueID targetProjectViewID, HPMUniqueID creatorID)
         {
             HPMSdkSession session = SessionManager.Session;
-            int sourceIndex = -1;
             HPMProjectResourceEnum sourceResources = session.ProjectResourceEnum(sourceProjectID);
             for (int i = 0; i < sourceResources.m_Resources.Length; i += 1)
             {
-                if (session.ResourceGetProperties(sourceResources.m_Resources[i]).m_Name == "Hansoft Admin")
-                {
-                    sourceIndex = i;
-                    break;
-                }
-            }
-            if (sourceIndex >= 0)
-            {
-                HPMReports oldReports = session.ProjectGetReports(sourceProjectViewID, sourceResources.m_Resources[sourceIndex]);
+                HPMReports oldReports = session.ProjectGetReports(sourceProjectViewID, sourceResources.m_Resources[i]);
                 if (oldReports.m_Reports.Length > 0)
                 {
                     for (int iReport = 0; iReport < oldReports.m_Reports.Length; iReport += 1)
                     {
+                        reportCounter += 1;
                         oldReports.m_Reports[iReport].m_ProjectID = targetProjectViewID;
                         oldReports.m_Reports[iReport].m_ReportGUID = 0;
-                        oldReports.m_Reports[iReport].m_ReportID = -1;
-
+                        oldReports.m_Reports[iReport].m_ReportID = reportCounter;
+                        oldReports.m_Reports[iReport].m_ResourceID = creatorID;
                     }
-                    session.ProjectSetReports(targetProjectViewID, sourceResources.m_Resources[sourceIndex], oldReports);
+                    session.ProjectSetReports(targetProjectViewID, creatorID, oldReports);
                 }
             }
         }
@@ -328,9 +321,14 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
             {
                 HPMSdkSession session = SessionManager.Session;
                 HPMProjectProperties properties = session.ProjectGetProperties(createdProject.UniqueID);
-                if (properties.m_SortName.StartsWith("Template - "))
+                if (properties.m_SortName.Contains(":Template - "))
                 {
-                    Project templateProject = HPMUtilities.FindProject(properties.m_SortName);
+                    int colonIndex = properties.m_SortName.IndexOf(':');
+                    string creatorIDString = properties.m_SortName.Substring(0, colonIndex);
+                    string templateName = properties.m_SortName.Substring(colonIndex + 1);
+                    Project templateProject = HPMUtilities.FindProject(templateName);
+                    HPMUniqueID creatorID = new HPMUniqueID();
+                    creatorID.m_ID = Int32.Parse(creatorIDString);
                     properties.m_SortName = "";
                     session.ProjectSetProperties(createdProject.UniqueID, properties);
                     if (templateProject != null)
@@ -346,9 +344,9 @@ namespace Hansoft.Jean.Behavior.CloneProjectBehavior
                         CloneColumns(sourceBacklogID, targetBacklogID);
                         CloneColumns(sourceQAProjectID, targetQAProjectID);
 
-                        CloneReports(sourceProjectID, sourceProjectID, targetProjectID);
-                        CloneReports(sourceProjectID, sourceBacklogID, targetBacklogID);
-                        CloneReports(sourceProjectID, sourceQAProjectID, targetQAProjectID);
+                        CloneReports(sourceProjectID, sourceProjectID, targetProjectID, creatorID);
+                        CloneReports(sourceProjectID, sourceBacklogID, targetBacklogID, creatorID);
+                        CloneReports(sourceProjectID, sourceQAProjectID, targetQAProjectID, creatorID);
 
                         ClonePresets(sourceProjectID, targetProjectID);
                         ClonePresets(sourceBacklogID, targetBacklogID);
